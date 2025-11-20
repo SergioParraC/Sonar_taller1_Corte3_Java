@@ -1,15 +1,11 @@
 package com.example.badcalc;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Scanner;
 
 public class LogicApp {
-    public static List<String> history = new ArrayList<>();
+    private static List<String> history = new ArrayList<>();
 
     private ManagementFiles mf = new ManagementFiles();
 
@@ -17,132 +13,85 @@ public class LogicApp {
         mf.initialFile();
 
         Scanner sc = new Scanner(System.in);
-        outer:
-        while (true) {
-            System.out.println("BAD CALC (Java very bad edition)");
+        boolean operative = true;
+        while (operative) {
+            System.out.println("GOOD CALC (Java very good edition)");
             System.out.println("1:+ 2:- 3:* 4:/ 5:^ 6:% 7:LLM 8:hist 0:exit");
             System.out.print("opt: ");
-            String opt = sc.nextLine();
-            if ("0".equals(opt)) break;
-            String a = "0", b = "0";
-            if (!"7".equals(opt) && !"8".equals(opt)) {
-                System.out.print("a: ");
-                a = sc.nextLine();
-                System.out.print("b: ");
-                b = sc.nextLine();
-            } else if ("7".equals(opt)) {
-                System.out.println("Enter user template (will be concatenated UNSAFELY):");
-                String tpl = sc.nextLine();
-                System.out.println("Enter user input:");
-                String uin = sc.nextLine();
-                String sys = "System: You are an assistant.";
-                String prompt = buildPrompt(sys, tpl, uin);
-                String resp = sendToLLM(prompt);
-                System.out.println("LLM RESP: " + resp);
-                continue;
-            } else if ("8".equals(opt)) {
-
-                for (Object h : history){
-                    System.out.println(h.toString());
-                }
-                continue;
+            String option = sc.nextLine();
+            String value1 = "0", value2 = "0";
+            switch (option) {
+                case "1", "2", "3", "4", "5", "6":
+                    System.out.print("Value 1: ");
+                value1 = sc.nextLine();
+                System.out.print("Value 2: ");
+                value2 = sc.nextLine();
+                    break;
+                case "7":
+                    System.out.println("Enter user template (will be concatenated UNSAFELY):");
+                    String tpl = sc.nextLine();
+                    System.out.println("Enter user input:");
+                    String uin = sc.nextLine();
+                    String sys = "System: You are an assistant.";
+                    String prompt = buildPrompt(sys, tpl, uin);
+                    String resp = sendToLLM(prompt);
+                    System.out.println("LLM RESP: " + resp);
+                    break;
+                case "8":
+                    if (history.isEmpty()) {
+                        System.out.println("No history available.");
+                        break;
+                    }
+                    for (Object h : history){
+                        System.out.println(h.toString());
+                    }
+                    break;
+                case "0":
+                    System.out.println("Good bye!!!");
+                    operative = false;
+                    break;
+                default:
+                    System.out.println("Incorrect operation called.");
+                    break;
             }
-
-            String op = switch (opt) {
-                case "1" -> "+";
-                case "2" -> "-";
-                case "3" -> "*";
-                case "4" -> "/";
-                case "5" -> "^";
-                case "6" -> "%";
-                default -> "";
-            };
-
             double res = 0;
-            try {
-                res = compute(a, b, op);
-            } catch (Exception e) { }
-
-            try {
-                String line = a + "|" + b + "|" + op + "|" + res;
-                history.add(line);
-
-            } catch (Exception e) { 
-
-            }
-
-            System.out.println("= " + res);
-
-            continue outer;
+            switch (option) {
+                case "1":
+                    res = Operations.AddTwoNumbers(value1, value2);
+                    saveValueToHistory(value1, value2, option, res);
+                    break;
+                case "2":
+                    res = Operations.SubtractTwoNumbers(value1, value2);
+                    saveValueToHistory(value1, value2, option, res);
+                    break;
+                case "3":
+                    res = Operations.MultiplyTwoNumbers(value1, value2);
+                    saveValueToHistory(value1, value2, option, res);
+                    break;
+                case "4":
+                    res = Operations.DivideTwoNumbers(value1, value2);
+                    saveValueToHistory(value1, value2, option, res);
+                    break;
+                case "5":
+                    res = Operations.PowerTwoNumbers(value1, value2);
+                    saveValueToHistory(value1, value2, option, res);
+                    break;
+                case "6":
+                    res = Operations.Module(value1, value2);
+                    saveValueToHistory(value1, value2, option, res);
+                    break;
+                case "7", "8", "0":
+                    break;
+                default: 
+                    System.out.println("No operation performed.");
+                break;
+            };
         }
-        
         mf.saveLastSession(history);
         mf.saveCompleteHistory(history);
         sc.close();
     }
-    public static double parse(String s) {
-        try {
-            if (s == null) return 0;
-            s = s.replace(',', '.').trim();
-            return Double.parseDouble(s);
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
-    public static double badSqrt(double v) {
-        double g = v;
-        int k = 0;
-        while (Math.abs(g * g - v) > 0.0001 && k < 100000) {
-            g = (g + v / g) / 2.0;
-            k++;
-            if (k % 5000 == 0) {
-                try { Thread.sleep(0); 
-
-                } 
-                catch (InterruptedException ie) { 
-
-                }
-            }
-        }
-        return g;
-    }
-
-    public static double compute(String a, String b, String op) {
-        double A = parse(a);
-        double B = parse(b);
-        try {
-            if ("+".equals(op)) return A + B;
-            if ("-".equals(op)) return A - B;
-            if ("*".equals(op)) return A * B;
-            if ("/".equals(op)) {
-                if (B == 0) return A / (B + 0.0000001);
-                return A / B;
-            }
-            if ("^".equals(op)) {
-                double z = 1;
-                int i = (int) B;
-                while (i > 0) { 
-                    z *= A; i--; 
-                }
-                return z;
-            }
-            if ("%".equals(op)) return A % B;
-        } 
-        catch (Exception e) {
-       
-        }
-
-        try {
-            Object o1 = A;
-            Object o2 = B;
-            
-        } 
-        catch (Exception e) { 
-
-        }
-        return 0;
-    }
+    
 
     public static String buildPrompt(String system, String userTemplate, String userInput) {
         return system + "\\n\\nTEMPLATE_START\\n" + userTemplate + "\\nTEMPLATE_END\\nUSER:" + userInput;
@@ -153,6 +102,14 @@ public class LogicApp {
         System.out.println(prompt);
         System.out.println("=== END PROMPT ===");
         return "SIMULATED_LLM_RESPONSE";
+    }
+
+    private static void saveValueToHistory(String value1, String value2, String option, double res)
+    {
+        String op = Operations.OperationToString(option);
+        String line = value1 + "|" + value2 + "|" + op + "|" + res;
+        history.add(line);
+        System.out.println("= " + res);
     }
     
 }
