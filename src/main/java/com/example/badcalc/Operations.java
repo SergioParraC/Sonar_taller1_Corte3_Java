@@ -1,29 +1,26 @@
 package com.example.badcalc;
 
 public class Operations {
-    private Operations() {
-        throw new IllegalStateException("Utility class");
-    }
-    public static double convertToDouble(String s) {
+    public double convertToDouble(String s) {
         try {
             if (s == null) return 0;
             s = s.replace(',', '.').trim();
             return Double.parseDouble(s);
         } catch (Exception ex) {
-            System.out.println("Error parsing number, please intro a numeric value: " + ex.getMessage());
+            System.out.print("Error parsing number, please intro a numeric value: " + ex.getMessage());
             return 0;
         }
     }
-    public static double addTwoNumbers(String value1, String value2) {
+    public double addTwoNumbers(String value1, String value2) {
         return convertToDouble(value1) + convertToDouble(value2);
     }
-    public static double subtractTwoNumbers(String value1, String value2) {
+    public double subtractTwoNumbers(String value1, String value2) {
         return convertToDouble(value1) - convertToDouble(value2);
     }
-    public static double multiplyTwoNumbers(String value1, String value2) {
+    public double multiplyTwoNumbers(String value1, String value2) {
         return convertToDouble(value1) * convertToDouble(value2);
     }
-    public static double divideTwoNumbers(String value1, String value2) {
+    public double divideTwoNumbers(String value1, String value2) {
         double valueA = convertToDouble(value1);
         double valueB = convertToDouble(value2);
         if (valueB == 0) {
@@ -33,7 +30,7 @@ public class Operations {
             return valueA / valueB;
         }
     }
-    public static double powerTwoNumbers(String value1, String value2) {
+    public double powerTwoNumbers(String value1, String value2) {
         double base = convertToDouble(value1);
         double exponent = convertToDouble(value2);
         double result = 1;
@@ -44,7 +41,7 @@ public class Operations {
         }
         return result;
     }
-    public static double module(String value1, String value2) {
+    public double module(String value1, String value2) {
         return convertToDouble(value1) % convertToDouble(value2);
     }
     public static String operationToString(String op) {
