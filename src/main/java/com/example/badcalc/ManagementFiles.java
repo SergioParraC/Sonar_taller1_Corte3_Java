@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class ManagementFiles {
+    // Método que crea el archivo inicial
     public void initialFile() {
         try {
             File f = new File("AUTO_PROMPT.txt");
